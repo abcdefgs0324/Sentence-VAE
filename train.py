@@ -86,6 +86,8 @@ def main(args):
 
     tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
     step = 0
+    val_lowest_elbo = 500
+    val_epoch = 0
     for epoch in range(args.epochs):
 
         for split in splits:
@@ -120,6 +122,9 @@ def main(args):
                 # loss calculation
                 NLL_loss, KL_loss, KL_weight = loss_fn(logp, batch['target'],
                     batch['length'], mean, logv, args.anneal_function, step, args.k, args.x0)
+
+                if split != 'train':
+                    KL_weight = 1.0
 
                 loss = (NLL_loss + KL_weight * KL_loss)/batch_size
 
@@ -168,6 +173,18 @@ def main(args):
                 checkpoint_path = os.path.join(save_model_path, "E%i.pytorch"%(epoch))
                 torch.save(model.state_dict(), checkpoint_path)
                 print("Model saved at %s"%checkpoint_path)
+
+            if split == 'valid':
+                if torch.mean(tracker['ELBO']) < val_lowest_elbo:
+                    val_lowest_elbo = torch.mean(tracker['ELBO'])
+                    val_epoch = 0
+                else:
+                    val_epoch += 1
+                    if val_epoch >= 3:
+                        if 'test' not in splits:
+                            exit()
+            elif split == 'test' and val_epoch >= 3:
+                exit()
 
 
 if __name__ == '__main__':
