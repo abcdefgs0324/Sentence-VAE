@@ -69,6 +69,8 @@ def main(args):
             return float(1/(1+np.exp(-k*(step-x0))))
         elif anneal_function == 'linear':
             return min(1, step/x0)
+        elif anneal_function == "softplus":
+            return min(1, np.log(1 + np.exp(k*step)))
 
     NLL = torch.nn.NLLLoss(size_average=False, ignore_index=datasets['train'].pad_idx)
     def loss_fn(logp, target, length, mean, logv, anneal_function, step, k, x0):
@@ -251,7 +253,7 @@ if __name__ == '__main__':
     args.anneal_function = args.anneal_function.lower()
 
     assert args.rnn_type in ['rnn', 'lstm', 'gru']
-    assert args.anneal_function in ['logistic', 'linear']
+    assert args.anneal_function in ['logistic', 'linear', 'softplus']
     assert 0 <= args.word_dropout <= 1
 
     main(args)
