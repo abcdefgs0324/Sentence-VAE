@@ -29,6 +29,10 @@ def main(args):
             min_occ=args.min_occ
         )
 
+    log_file = open("res.txt", "a")
+    log_file.write(expierment_name(args,ts))
+    log_file.write("\n")
+
     model = SentenceVAE(
         vocab_size=datasets['train'].vocab_size,
         sos_idx=datasets['train'].sos_idx,
@@ -86,8 +90,13 @@ def main(args):
 
     tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
     step = 0
-    val_lowest_elbo = 500
-    val_epoch = 0
+    val_lowest_elbo = 5000
+    val_accu_epoch = 0
+    val_min_epoch = 0
+    split_elbo = {"train": [], "valid": []}
+    if args.test:
+        split_elbo["test"] = []
+
     for epoch in range(args.epochs):
 
         for split in splits:
@@ -156,6 +165,7 @@ def main(args):
                     tracker['z'] = torch.cat((tracker['z'], z.data), dim=0)
 
             print("%s Epoch %02d/%i, Mean ELBO %9.4f"%(split.upper(), epoch, args.epochs, torch.mean(tracker['ELBO'])))
+            split_elbo[split].append([torch.mean(tracker["ELBO"])])
 
             if args.tensorboard_logging:
                 writer.add_scalar("%s-Epoch/ELBO"%split.upper(), torch.mean(tracker['ELBO']), epoch)
@@ -177,13 +187,27 @@ def main(args):
             if split == 'valid':
                 if torch.mean(tracker['ELBO']) < val_lowest_elbo:
                     val_lowest_elbo = torch.mean(tracker['ELBO'])
-                    val_epoch = 0
+                    val_accu_epoch = 0
+                    val_min_epoch = epoch
                 else:
-                    val_epoch += 1
-                    if val_epoch >= 3:
-                        if 'test' not in splits:
+                    val_accu_epoch += 1
+                    if val_accu_epoch >= 3:
+                        if not args.test:
+                            exp_str = ""
+                            exp_str += "train_ELBO={}\n".format(split_elbo["train"][val_min_epoch])
+                            exp_str += "valid_ELBO={}\n".format(split_elbo["valid"][val_min_epoch])
+                            exp_str += "==========\n"
+                            log_file.write(exp_str)
+                            log_file.close()
                             exit()
-            elif split == 'test' and val_epoch >= 3:
+            elif split == 'test' and val_accu_epoch >= 3:
+                exp_str = ""
+                exp_str += "train_ELBO={}\n".format(split_elbo["train"][val_min_epoch])
+                exp_str += "valid_ELBO={}\n".format(split_elbo["valid"][val_min_epoch])
+                exp_str += "test_ELBO={}\n".format(split_elbo["test"][val_min_epoch])
+                exp_str += "==========\n"
+                log_file.write(exp_str)
+                log_file.close()
                 exit()
 
 
