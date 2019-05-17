@@ -32,6 +32,9 @@ def main(args):
     log_file = open("res.txt", "a")
     log_file.write(expierment_name(args,ts))
     log_file.write("\n")
+    graph_file = open("elbo-graph.txt", "a")
+    graph_file.write(expierment_name(args,ts))
+    graph_file.write("\n")
 
     model = SentenceVAE(
         vocab_size=datasets['train'].vocab_size,
@@ -98,6 +101,9 @@ def main(args):
     split_elbo = {"train": [], "valid": []}
     if args.test:
         split_elbo["test"] = []
+    split_loss = {"train": [], "valid": []}
+    if args.test:
+        split_loss["test"] = []
 
     for epoch in range(args.epochs):
 
@@ -156,6 +162,8 @@ def main(args):
                     writer.add_scalar("%s/KL Loss"%split.upper(), KL_loss.data[0]/batch_size, epoch*len(data_loader) + iteration)
                     writer.add_scalar("%s/KL Weight"%split.upper(), KL_weight, epoch*len(data_loader) + iteration)
 
+                split_loss[split].append([loss.data[0], NLL_loss.data[0]/batch_size, KL_loss.data[0]/batch_size])
+
                 if iteration % args.print_every == 0 or iteration+1 == len(data_loader):
                     print("%s Batch %04d/%i, Loss %9.4f, NLL-Loss %9.4f, KL-Loss %9.4f, KL-Weight %6.3f"
                         %(split.upper(), iteration, len(data_loader)-1, loss.data[0], NLL_loss.data[0]/batch_size, KL_loss.data[0]/batch_size, KL_weight))
@@ -202,6 +210,43 @@ def main(args):
                             log_file.write(exp_str)
                             log_file.close()
                             print(exp_str)
+                            graph_file.write("train ELBO\n")
+                            line = ""
+                            for i in split_loss["train"]:
+                                line += "{},".format(i[0])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.write("train NLL\n")
+                            line = ""
+                            for i in split_loss["train"]:
+                                line += "{},".format(i[1])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.write("train KL\n")
+                            line = ""
+                            for i in split_loss["train"]:
+                                line += "{},".format(i[2])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.write("valid ELBO\n")
+                            line = ""
+                            for i in split_loss["valid"]:
+                                line += "{},".format(i[0])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.write("valid NLL\n")
+                            line = ""
+                            for i in split_loss["valid"]:
+                                line += "{},".format(i[1])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.write("valid KL\n")
+                            line = ""
+                            for i in split_loss["valid"]:
+                                line += "{},".format(i[2])
+                            line += "\n"
+                            graph_file.write(line)
+                            graph_file.close()
                             exit()
             elif split == 'test' and val_accu_epoch >= 3:
                 exp_str = ""
@@ -212,6 +257,61 @@ def main(args):
                 log_file.write(exp_str)
                 log_file.close()
                 print(exp_str)
+                graph_file.write("train ELBO\n")
+                line = ""
+                for i in split_loss["train"]:
+                    line += "{},".format(i[0])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("train NLL\n")
+                line = ""
+                for i in split_loss["train"]:
+                    line += "{},".format(i[1])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("train KL\n")
+                line = ""
+                for i in split_loss["train"]:
+                    line += "{},".format(i[2])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("valid ELBO\n")
+                line = ""
+                for i in split_loss["valid"]:
+                    line += "{},".format(i[0])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("valid NLL\n")
+                line = ""
+                for i in split_loss["valid"]:
+                    line += "{},".format(i[1])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("valid KL\n")
+                line = ""
+                for i in split_loss["valid"]:
+                    line += "{},".format(i[2])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("test ELBO\n")
+                line = ""
+                for i in split_loss["test"]:
+                    line += "{},".format(i[0])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("test NLL\n")
+                line = ""
+                for i in split_loss["test"]:
+                    line += "{},".format(i[1])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.write("test KL\n")
+                line = ""
+                for i in split_loss["test"]:
+                    line += "{},".format(i[2])
+                line += "\n"
+                graph_file.write(line)
+                graph_file.close()
                 exit()
 
 
