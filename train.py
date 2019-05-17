@@ -230,7 +230,7 @@ def main(args):
                             line = ""
                             for s in splits:
                                 for i in split_loss[s]:
-                                    line += "{},".format(i[1])
+                                    line += "{},".format(i[2])
                                 line += "\n"
                             graph_file.write(line)
                             graph_file.close()
@@ -250,6 +250,10 @@ def main(args):
                     for i in split_loss[s]:
                         line += "{},".format(i[0])
                     line += "\n"
+                for s in splits:
+                    for i in split_elbo[s]:
+                        line += "{},".format(i[0])
+                    line += "\n"
                 graph_file.write(line)
                 graph_file.write("NLL\n")
                 line = ""
@@ -262,7 +266,7 @@ def main(args):
                 line = ""
                 for s in splits:
                     for i in split_loss[s]:
-                        line += "{},".format(i[1])
+                        line += "{},".format(i[2])
                     line += "\n"
                 graph_file.write(line)
                 graph_file.close()
@@ -296,7 +300,7 @@ def main(args):
             line = ""
             for s in splits:
                 for i in split_loss[s]:
-                    line += "{},".format(i[1])
+                    line += "{},".format(i[2])
                 line += "\n"
             graph_file.write(line)
             graph_file.close()
