@@ -164,11 +164,11 @@ def main(args):
                     writer.add_scalar("%s/KL Loss"%split.upper(), KL_loss.data[0]/batch_size, epoch*len(data_loader) + iteration)
                     writer.add_scalar("%s/KL Weight"%split.upper(), KL_weight, epoch*len(data_loader) + iteration)
 
-                split_loss[split].append([loss.data[0], NLL_loss.data[0]/batch_size, KL_loss.data[0]/batch_size])
 
                 if iteration % args.print_every == 0 or iteration+1 == len(data_loader):
                     print("%s Batch %04d/%i, Loss %9.4f, NLL-Loss %9.4f, KL-Loss %9.4f, KL-Weight %6.3f"
                         %(split.upper(), iteration, len(data_loader)-1, loss.data[0], NLL_loss.data[0]/batch_size, KL_loss.data[0]/batch_size, KL_weight))
+                    split_loss[split].append([loss.data[0], NLL_loss.data[0]/batch_size, KL_loss.data[0]/batch_size])
 
                 if split == 'valid':
                     if 'target_sents' not in tracker:
