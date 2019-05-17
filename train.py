@@ -199,6 +199,7 @@ def main(args):
                             exp_str += "==========\n"
                             log_file.write(exp_str)
                             log_file.close()
+                            print(exp_str)
                             exit()
             elif split == 'test' and val_accu_epoch >= 3:
                 exp_str = ""
@@ -208,6 +209,7 @@ def main(args):
                 exp_str += "==========\n"
                 log_file.write(exp_str)
                 log_file.close()
+                print(exp_str)
                 exit()
 
 
