@@ -341,7 +341,7 @@ if __name__ == '__main__':
     args.anneal_function = args.anneal_function.lower()
 
     assert args.rnn_type in ['rnn', 'lstm', 'gru']
-    assert args.anneal_function in ['logistic', 'linear', 'softplus']
+    assert args.anneal_function in ['logistic', 'linear', 'softplus', 'no']
     assert 0 <= args.word_dropout <= 1
 
     main(args)
